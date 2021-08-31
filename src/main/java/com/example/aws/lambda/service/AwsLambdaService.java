@@ -1,5 +1,6 @@
 package com.example.aws.lambda.service;
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.example.aws.lambda.domain.Order;
 import com.example.aws.lambda.respository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,10 @@ public class AwsLambdaService {
     }
 
     @Bean
-    public Function<String, List<Order>> findOrderByName(){
-       return (input)-> orderRepository.preparOrder()
+    public Function<APIGatewayProxyRequestEvent, List<Order>> findOrderByName(){
+       return (requestEvent)-> orderRepository.preparOrder()
                 .stream()
-                .filter(order->order.getName().equals(input)).collect(Collectors.toList());
+                .filter(order->order.getName().equals(requestEvent.getQueryStringParameters().get("name")))
+                .collect(Collectors.toList());
     }
 }
